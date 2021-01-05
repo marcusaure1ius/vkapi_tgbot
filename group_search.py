@@ -1,12 +1,24 @@
 import requests
-import os
 import logging
-from dotenv import load_dotenv
-load_dotenv()
 
-VK_TOKEN = os.getenv('VK_TOKEN')
+from config import config
+
+VK_TOKEN = config.VK_TOKEN
 URL = 'https://api.vk.com/method/'
 VERS = '5.126'
+
+def text_slice(text):
+    def utf8len(s):
+        return len(s.encode('utf-8'))
+
+    k = 70
+
+    while utf8len(text)>64:
+        
+        text = text[0:k]+'...'
+        k -= 1
+    
+    return text
 
 def GetCleanData(group):
     try:
@@ -15,9 +27,11 @@ def GetCleanData(group):
         group_id = 'group_id_is_null'
 
     try:
-        group_name = group['name']
+        group_name = str(group['name']).replace(':','')
     except:
         group_name = 'group_name_is_null'
+
+    # group_name = text_slice(group_name)
 
     return_data = {
         'group_id':group_id,
@@ -26,12 +40,12 @@ def GetCleanData(group):
 
     return return_data
 
-def SearchGroup():
+def SearchGroup(search_message):
     raw_groups_array=[]
     clean_groups_array=[]
-    count = 2
+    count = 3
     sort = 1
-    q='Рифмы'
+    q=search_message
     r = requests.get(url=URL+'groups.search', params={
         'access_token':VK_TOKEN,
         'v':VERS,
@@ -47,11 +61,10 @@ def SearchGroup():
         clean_groups = GetCleanData(group)
         clean_groups_array.append(clean_groups)
     
-    print (clean_groups_array)
+    return clean_groups_array
 
 def main():
-    SearchGroup()
-
+    print(SearchGroup('клуб'))
 
 if __name__ == '__main__':
     main()

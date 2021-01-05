@@ -3,34 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from vk_fetching import GetGroupInfoById
 
-post_data = GetGroupInfoById()
-
-df = pd.DataFrame(post_data)
-
-df['post_dt'] = pd.to_datetime(df['post_dt'])
-df['post_date'] = df['post_dt'].map(lambda x: x.strftime('%Y-%m-%d'))
-df['post_ym'] = df['post_dt'].map(lambda x: x.strftime('%Y-%m'))
-
-mean_day_posts = round(df.groupby(['post_date'])['post_id'].count().mean())
-mean_month_posts = round(df.groupby(['post_ym'])['post_id'].count().mean())
-mean_likes = round(df['post_likes'].mean())
-mean_reposts = round(df['post_reposts'].mean())
-mean_comments = round(df['post_comments'].mean())
-mean_views = round(df['post_views'].mean())
-conv_views_to_likes = round((mean_likes/mean_views)*100, 2)
-
-print('------------------------')
-print('Среднее кол-во постов в день:',mean_day_posts)
-print('Среднее кол-во постов в месяц:',mean_month_posts)
-print('Среднее кол-во лайков под постом:',mean_likes)
-print('Среднее кол-во репостов под постом:',mean_reposts)
-print('Среднее кол-во комментариев под постом:',mean_comments)
-print('Среднее кол-во просмотров под постом:',mean_views)
-print('Конверсия просмотров к лайкам:',conv_views_to_likes)
-
-l = df.groupby(['post_ym']).agg({'post_views':['sum', 'mean'], 'post_likes':['sum', 'mean'], 'post_comments':['sum', 'mean'], 'post_reposts':['sum', 'mean']})
-
-def GetBarPlot(measure, agg):
+def GetBarPlot(measure, agg, l):
     fig, ax = plt.subplots()
     ax.bar(l.index, l[measure][agg], color = 'red')
     fig.set_figwidth(16)
@@ -59,12 +32,55 @@ def GetBarPlot(measure, agg):
     plt.savefig('png/'+measure+agg+'.png')
     # plt.show(block=False)
 
-GetBarPlot('post_views', 'mean')
-GetBarPlot('post_views', 'sum')
-GetBarPlot('post_comments', 'mean')
-GetBarPlot('post_comments', 'sum')
-GetBarPlot('post_likes', 'mean')
-GetBarPlot('post_likes', 'sum')
-GetBarPlot('post_reposts', 'mean')
-GetBarPlot('post_reposts', 'sum')
-print('Графики сохранены в папку png/')
+def get_group_stats(group):
+
+
+    post_data = GetGroupInfoById(group)
+
+    df = pd.DataFrame(post_data)
+
+    df['post_dt'] = pd.to_datetime(df['post_dt'])
+    df['post_date'] = df['post_dt'].map(lambda x: x.strftime('%Y-%m-%d'))
+    df['post_ym'] = df['post_dt'].map(lambda x: x.strftime('%Y-%m'))
+
+    mean_day_posts = round(df.groupby(['post_date'])['post_id'].count().mean())
+    mean_month_posts = round(df.groupby(['post_ym'])['post_id'].count().mean())
+    mean_likes = round(df['post_likes'].mean())
+    mean_reposts = round(df['post_reposts'].mean())
+    mean_comments = round(df['post_comments'].mean())
+    mean_views = round(df['post_views'].mean())
+    conv_views_to_likes = round((mean_likes/mean_views)*100, 2)
+
+    # print('------------------------')
+    # print('Среднее кол-во постов в день:',mean_day_posts)
+    # print('Среднее кол-во постов в месяц:',mean_month_posts)
+    # print('Среднее кол-во лайков под постом:',mean_likes)
+    # print('Среднее кол-во репостов под постом:',mean_reposts)
+    # print('Среднее кол-во комментариев под постом:',mean_comments)
+    # print('Среднее кол-во просмотров под постом:',mean_views)
+    # print('Конверсия просмотров к лайкам:',conv_views_to_likes)
+
+    l = df.groupby(['post_ym']).agg({'post_views':['sum', 'mean'], 'post_likes':['sum', 'mean'], 'post_comments':['sum', 'mean'], 'post_reposts':['sum', 'mean']})
+
+    return_list = {
+        'mean_day_posts':mean_day_posts,
+        'mean_month_posts':mean_month_posts,
+        'mean_likes':mean_likes,
+        'mean_reposts':mean_reposts,
+        'mean_comments':mean_comments,
+        'mean_views':mean_views,
+        'conv_views_to_likes':conv_views_to_likes
+    }
+
+    return return_list
+
+
+    # GetBarPlot('post_views', 'mean')
+    # GetBarPlot('post_views', 'sum')
+    # GetBarPlot('post_comments', 'mean')
+    # GetBarPlot('post_comments', 'sum')
+    # GetBarPlot('post_likes', 'mean')
+    # GetBarPlot('post_likes', 'sum')
+    # GetBarPlot('post_reposts', 'mean')
+    # GetBarPlot('post_reposts', 'sum')
+    # print('Графики сохранены в папку png/')
