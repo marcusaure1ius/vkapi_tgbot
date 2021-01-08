@@ -137,7 +137,7 @@ def GetGroupInfoById(group):
         # print('Загружено {} постов...'.format(len(all_posts)))
 
         if oldest_post_dt <= 1606850938:
-            break;
+            break
         
 
     for post in all_posts:
